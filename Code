@@ -1,0 +1,111 @@
+import os
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, accuracy_score
+
+# Example training data
+texts = [
+    "The concert last night was an incredible experience! The band's energy was infectious, and the crowd was electric.",
+    "I'm extremely disappointed with the customer service. They were rude and unhelpful, and I had to wait on hold for over an hour.",
+    "The movie was a letdown. The plot was predictable, and the acting was mediocre at best.",
+    "I just received my order, and the packaging was damaged. However, the product inside seems to be in good condition.",
+    "I am thrilled with the new features in this software update. It has made my work much more efficient.",
+    "The hotel room was clean and well-maintained, but the view was underwhelming and not as advertised.",
+    "I've been using this app for a week, and it's been a mixed experience. Some features work flawlessly, while others are buggy.",
+    "The delivery was quick, and the product quality exceeded my expectations. Will definitely order again!",
+    "I'm frustrated with the billing department. They overcharged me and haven't resolved the issue despite multiple calls.",
+    "The book was an enjoyable read. The characters were well-developed, and the plot was engaging, though the ending felt rushed.",
+    "This gadget is a game-changer! It's intuitive, easy to use, and has significantly improved my daily routine.",
+    "I was underwhelmed by the store's collection. They didn't have the variety I was expecting, and the staff was indifferent.",
+    "The meal was delicious, especially the dessert. The presentation was also excellent, making it a delightful dining experience.",
+    "I'm upset with the recent changes in the app. The new interface is confusing, and several features I used frequently are now missing.",
+    "The team's performance was outstanding! They played with great skill and coordination, making it an exciting game to watch.",
+    "The room service was prompt, but the food quality was subpar. It didn't live up to the hotel's reputation.",
+    "This course was a valuable learning experience. The instructor was knowledgeable and engaging, making complex topics easy to understand.",
+    "I was not satisfied with the online shopping experience. The website was slow, and the item descriptions were inaccurate.",
+    "The beach resort was beautiful, with stunning views and excellent amenities. It was a perfect getaway for relaxation.",
+    "The phone's battery life is disappointing. It barely lasts a day, even with minimal use, which is frustrating.",
+    "I'm really happy with the new furniture. It's stylish, comfortable, and fits perfectly in my living room.",
+    "The repair service was efficient, but they charged more than the initial estimate, which was frustrating.",
+    "The new game has fantastic graphics, but the gameplay feels repetitive and gets boring quickly.",
+    "I'm grateful for the support I received from the customer service team. They resolved my issue quickly and professionally.",
+    "The workshop was informative, but it felt rushed towards the end, leaving little time for questions.",
+    "The outdoor adventure was thrilling! The guides were experienced and made sure everyone was safe throughout the activities.",
+    "The show's finale was a major letdown. The story felt incomplete, and the ending didn't satisfy the fans' expectations.",
+    "I appreciate the eco-friendly packaging of the products. It's great to see companies taking steps towards sustainability.",
+    "The new restaurant had a great ambiance, but the food was overpriced and not particularly tasty.",
+    "The travel agency provided excellent service. They planned the trip meticulously, ensuring a hassle-free vacation experience."
+]
+
+labels = [
+    "positive", "negative", "negative", "neutral", "positive",
+    "neutral", "neutral", "positive", "negative", "neutral",
+    "positive", "negative", "positive", "negative", "positive",
+    "negative", "positive", "negative", "positive", "negative",
+    "positive", "negative", "neutral", "positive", "negative",
+    "positive", "neutral", "positive", "negative", "positive"
+]
+
+
+# Convert labels to binary format for simplicity
+# Mapping of sentiment labels to numerical values
+label_mapping = {"positive": 1, "negative": -1, "neutral": 0}
+
+# Converting labels to numerical values
+numerical_labels = [label_mapping[label] for label in labels]
+
+
+# Feature extraction using TF-IDF
+vectorizer = TfidfVectorizer()
+X = vectorizer.fit_transform(texts)
+y = labels
+
+# Train the model
+model = LogisticRegression()
+model.fit(X, y)
+
+# Function to predict sentiment
+def predict_sentiment(text):
+    text_transformed = vectorizer.transform([text])
+    prediction = model.predict(text_transformed)[0]
+    sentiment = "positive" if prediction == 1 else "negative"
+    return sentiment
+
+# Function to analyze a document
+def analyze_document(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        content = file.read()
+    print("\nDocument Sentiment Analysis:")
+    sentences = content.split('\n')
+    for sentence in sentences:
+        if sentence.strip():  # Skip empty lines
+            sentiment = predict_sentiment(sentence)
+            print(f"Sentence: {sentence}")
+            print(f"Sentiment: {sentiment}\n")
+
+# User interface
+def main():
+    print("Sentiment Analysis Tool")
+    print("1. Enter a sentence")
+    print("2. Upload a document")
+
+    choice = input("Choose an option (1 or 2): ")
+
+    if choice == '1':
+        user_input = input("Enter your sentence: ")
+        sentiment = predict_sentiment(user_input)
+        print(f"Sentiment: {sentiment}")
+
+    elif choice == '2':
+        file_path = input("Enter the file path: ")
+        if os.path.exists(file_path):
+            analyze_document(file_path)
+        else:
+            print("File not found. Please check the path and try again.")
+
+    else:
+        print("Invalid choice. Please enter 1 or 2.")
+
+if __name__ == "__main__":
+    main()
